@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from "cors";
 import initializeRoutes from './routes/index.js';
-import { notFoundHandler, jsonErrorHandler } from './middleware/errorHandler.js';
+import { notFoundHandler, jsonErrorHandler, rejectOptions, rejectHead, rejectQueryParams } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 
 /**
@@ -12,12 +12,15 @@ import { logger } from './utils/logger.js';
 const initialze = (app)=>{
     try {
         logger.info('Initializing Application');
+        app.use(rejectOptions);
+        app.use(rejectHead);
         
         logger.debug('Setting up CORS middleware');
         app.use(cors());
         
         app.use(express.json());
         app.use(express.urlencoded({ extended: false }));
+        app.use(rejectQueryParams);
         
         logger.debug('Initializing application routes');
         initializeRoutes(app);

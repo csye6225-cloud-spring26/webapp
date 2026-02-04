@@ -26,7 +26,12 @@ export async function createUser(req, res) {
         return setUnsupportedMediaType({ message: 'Content-Type must be application/json' }, req, res);
     }
 
-    const { username, password, first_name, last_name } = req.body;
+    let { username, password, first_name, last_name } = req.body;
+
+    // Convert username to lowercase
+    if (username) {
+        username = username.toLowerCase();
+    }
 
     // Validate all required fields are present
     const requiredFields = ['username', 'password', 'first_name', 'last_name'];
@@ -65,11 +70,11 @@ export async function createUser(req, res) {
             return setConflict({ message: 'A user with this email address already exists' }, req, res);
         }
 
-        const user = await registerUser(req.body);
+        const user = await registerUser({ username, password, first_name, last_name });
         // Exclude password from response payload for security
         const { password: _, ...response } = user;
         logger.info('User created successfully', { username });
-        return setResourceCreated(response, 'User created successfully', res);
+        return res.status(201).json(response);
     } catch (error) {
         logger.error('Error creating user', { username, error: error.message, stack: error.stack });
         return setInternalServerError(error, req, res);
@@ -83,7 +88,7 @@ export async function createUser(req, res) {
 export function getSelf(req, res) {
     logger.info('Retrieve user info', { username: req.user?.username, method: req.method, path: req.originalUrl.split('?')[0] });
     const { id, first_name, last_name, username, account_created, account_updated } = req.user;
-    return setSuccess({ id, first_name, last_name, username, account_created, account_updated }, 'User information retrieved successfully', res);
+    return res.status(200).json({ id, first_name, last_name, username, account_created, account_updated });
 }
 
 /**

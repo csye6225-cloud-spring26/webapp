@@ -11,8 +11,10 @@ const SALT_ROUNDS = 10;
  */
 export async function userExists(username) {
   try {
-    logger.debug('Checking if user exists', { username });
-    const user = await getUserByUsername(username);
+    // Convert to lowercase for case-insensitive check
+    const lowercaseUsername = username.toLowerCase();
+    logger.debug('Checking if user exists', { username: lowercaseUsername });
+    const user = await getUserByUsername(lowercaseUsername);
     const exists = user !== null;
     return exists;
   } catch (error) {
@@ -28,11 +30,13 @@ export async function userExists(username) {
  */
 export async function registerUser({ username, password, first_name, last_name }) {
     try {
-        logger.info('Registering new user', { username, first_name, last_name });
+        // Ensure username is lowercase
+        const lowercaseUsername = username.toLowerCase();
+        logger.info('Registering new user', { username: lowercaseUsername, first_name, last_name });
         const hash = await bcrypt.hash(password, SALT_ROUNDS);
         const now = new Date();
         const user = await createUser({
-            username,
+            username: lowercaseUsername,
             password: hash,
             first_name,
             last_name,
