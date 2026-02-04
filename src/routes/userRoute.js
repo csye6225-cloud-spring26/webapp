@@ -1,5 +1,6 @@
 import express from 'express';
 import basicAuth from '../middleware/basicAuth.js';
+import { rejectAuthHeaders } from '../middleware/errorHandler.js';
 import {
   createUser,
   getSelf,
@@ -8,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.post('/', createUser);
+router.post('/', rejectAuthHeaders, createUser);
 router.get('/self', basicAuth, getSelf);
 router.put('/self', basicAuth, updateSelf);
 
