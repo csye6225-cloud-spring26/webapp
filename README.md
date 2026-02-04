@@ -106,3 +106,7 @@ npm run test:watch
 **Migration errors:**
 - Reset the database: `npx prisma migrate reset --force`
 - Regenerate Prisma client: `npm run prisma:generate`
+
+> **Note**: This repository uses GitHub Actions for CI.
+> All changes to the `main` branch must be made via pull requests
+> and must pass required status checks before merging
