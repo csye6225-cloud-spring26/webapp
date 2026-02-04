@@ -23,7 +23,12 @@ export default async function basicAuth(req, res, next) {
 
     // Decode Base64 credentials from Authorization header
     const decoded = Buffer.from(auth.split(' ')[1], 'base64').toString();
-    const [username, password] = decoded.split(':');
+    let [username, password] = decoded.split(':');
+    
+    // Convert username to lowercase for case-insensitive matching
+    if (username) {
+        username = username.toLowerCase();
+    }
 
     if (!username || !password) {
       logger.warn('Authentication failed - incomplete credentials', { 

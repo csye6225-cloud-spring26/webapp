@@ -26,7 +26,12 @@ export async function createUser(req, res) {
         return setUnsupportedMediaType({ message: 'Content-Type must be application/json' }, req, res);
     }
 
-    const { username, password, first_name, last_name } = req.body;
+    let { username, password, first_name, last_name } = req.body;
+
+    // Convert username to lowercase
+    if (username) {
+        username = username.toLowerCase();
+    }
 
     // Validate all required fields are present
     const requiredFields = ['username', 'password', 'first_name', 'last_name'];
@@ -65,7 +70,7 @@ export async function createUser(req, res) {
             return setConflict({ message: 'A user with this email address already exists' }, req, res);
         }
 
-        const user = await registerUser(req.body);
+        const user = await registerUser({ username, password, first_name, last_name });
         // Exclude password from response payload for security
         const { password: _, ...response } = user;
         logger.info('User created successfully', { username });
