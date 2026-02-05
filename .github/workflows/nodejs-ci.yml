@@ -21,6 +21,9 @@ jobs:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
+
     steps:
       # Step 1: Checkout the repo
       - name: Checkout repository
@@ -34,18 +37,12 @@ jobs:
 
       # Step 3: Install dependencies
       - name: Install dependencies
-        env:
-          DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
         run: npm install
 
       # Step 4: Run Prisma migrations
       - name: Run Prisma migrations
-        env:
-          DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
         run: npm run prisma:migrate:deploy
 
       # Step 5: Run tests
       - name: Run tests
-        env:
-          DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
         run: npm test -- --passWithNoTests
