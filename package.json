@@ -6,6 +6,7 @@
   "scripts": {
     "start": "prisma migrate deploy && node index.js",
     "dev": "prisma migrate dev && node index.js",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "test": "cross-env NODE_ENV=test jest",
