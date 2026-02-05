@@ -34,6 +34,8 @@ jobs:
 
       # Step 3: Install dependencies
       - name: Install dependencies
+        env:
+          DATABASE_URL: postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}
         run: npm install
 
       # Step 4: Run Prisma migrations
