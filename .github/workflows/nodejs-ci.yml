@@ -19,10 +19,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       # Step 3: Install dependencies
       - name: Install dependencies
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npm install
 
       # Step 4: Run tests safely (won't fail if no tests exist yet)
