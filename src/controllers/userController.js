@@ -28,11 +28,6 @@ export async function createUser(req, res) {
 
     let { username, password, first_name, last_name } = req.body;
 
-    // Convert username to lowercase
-    if (username) {
-        username = username.toLowerCase();
-    }
-
     // Validate all required fields are present
     const requiredFields = ['username', 'password', 'first_name', 'last_name'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
@@ -44,6 +39,22 @@ export async function createUser(req, res) {
         }, req, res);
     }
 
+        // Validate field types
+    if (typeof username !== 'string' || typeof password !== 'string' || typeof first_name !== 'string' || typeof last_name !== 'string') {
+        logger.warn('Invalid data types for user creation', { 
+            usernameType: typeof username,
+            passwordType: typeof password,
+            firstNameType: typeof first_name,
+            lastNameType: typeof last_name
+        });
+        return setBadRequestValidation({ message: 'Invalid input data types' }, req, res);
+    }
+
+    // Convert username to lowercase
+    if (username) {
+        username = username.toLowerCase();
+    }
+    
     // Validate email format
     if (!EMAIL_REGEX.test(username)) {
         logger.warn('Invalid email format for user creation', { username });
@@ -102,6 +113,17 @@ export async function updateSelf(req, res) {
     if (!contentType || !contentType.includes('application/json')) {
         logger.warn('Invalid Content-Type for user update', { contentType });
         return setUnsupportedMediaType({ message: 'Content-Type must be application/json' }, req, res);
+    }
+
+    // Validate field types when present
+    if (req.body.password !== undefined && typeof req.body.password !== 'string') {
+        return setBadRequestValidation({ message: 'Invalid input data types' }, req, res);
+    }
+    if (req.body.first_name !== undefined && typeof req.body.first_name !== 'string') {
+        return setBadRequestValidation({ message: 'Invalid input data types' }, req, res);
+    }
+    if (req.body.last_name !== undefined && typeof req.body.last_name !== 'string') {
+        return setBadRequestValidation({ message: 'Invalid input data types' }, req, res);
     }
 
     logger.info('Update user request', { username: req.user?.username, fields: Object.keys(req.body), method: req.method, path: req.originalUrl.split('?')[0] });
