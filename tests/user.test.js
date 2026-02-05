@@ -565,6 +565,7 @@ describe('B. 1. Invalid Input Tests', () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toContain('Missing required fields');
   });
 
   test('B.1.2 - Reject missing password', async () => {
@@ -581,6 +582,7 @@ describe('B. 1. Invalid Input Tests', () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toContain('Missing required fields');
   });
 
   test('B.1.3 - Reject missing first name', async () => {
@@ -597,6 +599,7 @@ describe('B. 1. Invalid Input Tests', () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toContain('Missing required fields');
   });
 
   test('B.1.4 - Reject missing last name', async () => {
@@ -613,6 +616,7 @@ describe('B. 1. Invalid Input Tests', () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty('message');
+    expect(response.body.message).toContain('Missing required fields');
   });
 
   test('B.1.5 - Reject invalid email format', async () => {
@@ -646,6 +650,7 @@ describe('B. 1. Invalid Input Tests', () => {
       .send(userData);
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('valid email');
   });
 
   test('B.1.7 - Reject email without domain', async () => {
@@ -662,6 +667,7 @@ describe('B. 1. Invalid Input Tests', () => {
       .send(userData);
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('valid email');
   });
 
   test('B.1.8 - Reject password less than 8 chars', async () => {
@@ -717,6 +723,7 @@ describe('B. 1. Invalid Input Tests', () => {
       .send(userData);
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('required');
   });
 
   test('B.1.11 - Reject empty last name', async () => {
@@ -733,6 +740,7 @@ describe('B. 1. Invalid Input Tests', () => {
       .send(userData);
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('required');
   });
 
   test('B.1.12 - Reject invalid data type for first name', async () => {
@@ -749,6 +757,7 @@ describe('B. 1. Invalid Input Tests', () => {
       .send(userData);
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('Invalid input data types');
   });
 
   test('B.1.13 - Reject empty first name on update', async () => {
@@ -774,6 +783,7 @@ describe('B. 1. Invalid Input Tests', () => {
       });
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('cannot be empty');
   });
 
   test('B.1.14 - Reject empty last name on update', async () => {
@@ -799,6 +809,7 @@ describe('B. 1. Invalid Input Tests', () => {
       });
 
     expect(response.status).toBe(400);
+    expect(response.body.message).toContain('cannot be empty');
   });
 
   test('B.1.15 - Reject short password on update', async () => {
@@ -879,6 +890,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', authHeader);
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.2 - Reject login for non-existent user', async () => {
@@ -888,6 +900,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', authHeader);
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.3 - Reject access without auth header', async () => {
@@ -895,6 +908,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .get('\/v1\/user/self');
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.4 - Reject malformed auth header', async () => {
@@ -903,6 +917,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', 'Bearer invalidtoken123');
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.5 - Reject incomplete credentials', async () => {
@@ -912,6 +927,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', authHeader);
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.6 - Reject missing password in auth', async () => {
@@ -921,6 +937,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', authHeader);
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.7 - Reject update without auth', async () => {
@@ -932,6 +949,7 @@ describe('B. 2. Authentication Error Tests', () => {
       });
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.8 - Reject update with wrong credentials', async () => {
@@ -945,6 +963,7 @@ describe('B. 2. Authentication Error Tests', () => {
       });
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.9 - Reject invalid base64 auth', async () => {
@@ -954,6 +973,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', authHeader);
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 
   test('B.2.10 - Password is case sensitive', async () => {
@@ -975,6 +995,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .set('Authorization', authHeader);
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 });
 
@@ -1009,6 +1030,7 @@ describe('B. 3. Resource Not Found Tests', () => {
       });
 
     expect(response.status).toBe(401);
+    expect(response.body.message).toContain('Authentication');
   });
 });
 

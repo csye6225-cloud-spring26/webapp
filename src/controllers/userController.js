@@ -28,7 +28,18 @@ export async function createUser(req, res) {
 
     let { username, password, first_name, last_name } = req.body;
 
-    // Validate field types
+    // Validate all required fields are present
+    const requiredFields = ['username', 'password', 'first_name', 'last_name'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+
+    if (missingFields.length > 0) {
+        logger.warn('Missing required fields for user creation', { missingFields });
+        return setBadRequestValidation({ 
+            message: `Missing required fields: ${missingFields.join(', ')}` 
+        }, req, res);
+    }
+
+        // Validate field types
     if (typeof username !== 'string' || typeof password !== 'string' || typeof first_name !== 'string' || typeof last_name !== 'string') {
         logger.warn('Invalid data types for user creation', { 
             usernameType: typeof username,
@@ -43,18 +54,7 @@ export async function createUser(req, res) {
     if (username) {
         username = username.toLowerCase();
     }
-
-    // Validate all required fields are present
-    const requiredFields = ['username', 'password', 'first_name', 'last_name'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-
-    if (missingFields.length > 0) {
-        logger.warn('Missing required fields for user creation', { missingFields });
-        return setBadRequestValidation({ 
-            message: `Missing required fields: ${missingFields.join(', ')}` 
-        }, req, res);
-    }
-
+    
     // Validate email format
     if (!EMAIL_REGEX.test(username)) {
         logger.warn('Invalid email format for user creation', { username });
