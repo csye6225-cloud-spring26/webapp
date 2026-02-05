@@ -748,7 +748,7 @@ describe('B. 1. Invalid Input Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
-    expect([400, 500]).toContain(response.status);
+    expect(response.status).toBe(400);
   });
 
   test('B.1.13 - Reject empty first name on update', async () => {
@@ -953,7 +953,7 @@ describe('B. 2. Authentication Error Tests', () => {
       .get('\/v1\/user/self')
       .set('Authorization', authHeader);
 
-    expect([400, 401]).toContain(response.status);
+    expect(response.status).toBe(401);
   });
 
   test('B.2.10 - Password is case sensitive', async () => {
@@ -1109,7 +1109,7 @@ describe('C. 1. Boundary Value Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
-    expect([201, 400]).toContain(response.status);
+    expect(response.status).toBe(201);
   });
 
   test('C.1.2 - Handle long last name', async () => {
@@ -1126,7 +1126,7 @@ describe('C. 1. Boundary Value Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
-    expect([201, 400]).toContain(response.status);
+    expect(response.status).toBe(201);
   });
 
   test('C.1.3 - Handle long password', async () => {
@@ -1143,7 +1143,7 @@ describe('C. 1. Boundary Value Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
-    expect([201, 400]).toContain(response.status);
+    expect(response.status).toBe(201);
   });
 
   test('C.1.4 - Minimum password length (8 chars)', async () => {
@@ -1207,7 +1207,7 @@ describe('C. 1. Boundary Value Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
-    expect([201, 400]).toContain(response.status);
+    expect(response.status).toBe(201);
   });
 
   test('C.1.8 - Handle Unicode in last name', async () => {
@@ -1223,7 +1223,7 @@ describe('C. 1. Boundary Value Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
-    expect([201, 400]).toContain(response.status);
+    expect(response.status).toBe(201);
   });
 
   test('C.1.9 - Handle numbers in email', async () => {
