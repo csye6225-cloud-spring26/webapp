@@ -29,4 +29,6 @@ jobs:
 
       # Step 4: Run tests safely (won't fail if no tests exist yet)
       - name: Run tests
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npm test -- --passWithNoTests
