@@ -5,6 +5,6 @@ import { rejectNonGetMethods, rejectAuthHeaders } from '../middleware/errorHandl
 const router = express.Router();
 
 // Apply middleware to reject non-GET methods, auth headers, then handle health check
-router.get('/', rejectAuthHeaders, healthCheck);
+router.all('/', rejectNonGetMethods, rejectAuthHeaders, healthCheck);
 
 export default router;
