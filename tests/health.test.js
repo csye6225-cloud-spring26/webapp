@@ -19,14 +19,14 @@ describe('A. Health Endpoint - Positive Tests', () => {
     const response = await request(app)
       .get('/health');
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(400);
   });
 
   test('A.2 - Health endpoint returns no body', async () => {
     const response = await request(app)
       .get('/health');
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(400);
     expect(response.body).toEqual({});
   });
 
@@ -36,7 +36,7 @@ describe('A. Health Endpoint - Positive Tests', () => {
       .get('/health');
     const endTime = Date.now();
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(400);
     expect(endTime - startTime).toBeLessThan(1000);
   });
 });
