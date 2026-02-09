@@ -27,3 +27,15 @@ apt update -y
 # Applies latest patches
 apt upgrade -y
 
+# -------------------------------------
+# Install PostgreSQL
+# -------------------------------------
+
+# Condition to check if postgres is not installed
+if ! command -v psql >/dev/null 2>&1; then
+  apt install -y postgresql postgresql-contrib
+fi
+
+# Start PostgreSQL and enable it on boot
+systemctl enable postgresql
+systemctl start postgresql
