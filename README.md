@@ -1,6 +1,6 @@
 # Service API
 
-Node.js REST API with Express, Prisma, and PostgreSQL for user management.
+Node.js REST API with Express, Prisma, and PostgreSQL for user management 
 
 ## Prerequisites
 
