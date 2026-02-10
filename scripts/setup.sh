@@ -130,3 +130,5 @@ chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 # 5 - Group users have read and run access but no write access, and
 # 0 - Others have no access
 chmod -R 750 "$APP_DIR"
+
+echo "Setup completed successfully!"
