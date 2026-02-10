@@ -81,3 +81,28 @@ fi
 if ! command -v pm2 >/dev/null 2>&1; then
     npm install -g pm2
 fi
+
+# -------------------------------------
+# Step 6: Create application group and user
+# -------------------------------------
+
+# Create group if it does not exist
+if ! getent group csye6225 >/dev/null; then
+    groupadd csye6225
+fi
+
+# Create user if it does not exist
+# --system: create a system account
+# --no-create-home: do not create a home directory
+# --gid csye6225: assign user to application group
+# --shell /usr/sbin/nologin: disable interactive login
+if ! id csye6225 >/dev/null 2>&1; then
+    useradd \
+        --system \
+        --no-create-home \
+        --gid csye6225 \
+        --shell /usr/sbin/nologin \
+        csye6225
+fi
+
+
