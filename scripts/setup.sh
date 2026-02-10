@@ -44,7 +44,7 @@ systemctl start postgresql
 # Step 4: Create PostgreSQL database and user
 # -------------------------------------
 
-DB_NAME="webapp"
+DB_NAME="csye6225_webapp_db"
 DB_USER="webappuser"
 
 sudo -u postgres psql <<EOF
@@ -66,3 +66,18 @@ END
 
 GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
 EOF
+
+# -------------------------------------
+# Step 5: Install Node.js 20 and pm2
+# -------------------------------------
+
+# Check if Node.js is installed; install Node.js 20 if missing
+if ! command -v node >/dev/null 2>&1; then
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt install -y nodejs
+fi
+
+# Check if PM2 is installed; install it globally if missing
+if ! command -v pm2 >/dev/null 2>&1; then
+    npm install -g pm2
+fi
