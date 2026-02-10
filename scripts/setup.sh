@@ -41,7 +41,7 @@ systemctl enable postgresql
 systemctl start postgresql
 
 # -------------------------------------
-# Step 4: Create PostgreSQL database and user
+# Create PostgreSQL database and user
 # -------------------------------------
 
 DB_NAME="csye6225_webapp_db"
@@ -68,7 +68,7 @@ GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
 EOF
 
 # -------------------------------------
-# Step 5: Install Node.js 20 and pm2
+# Install Node.js 20 and pm2
 # -------------------------------------
 
 # Check if Node.js is installed; install Node.js 20 if missing
@@ -83,7 +83,7 @@ if ! command -v pm2 >/dev/null 2>&1; then
 fi
 
 # -------------------------------------
-# Step 6: Create application group and user
+# Create application group and user
 # -------------------------------------
 
 # Create group if it does not exist
@@ -105,4 +105,28 @@ if ! id csye6225 >/dev/null 2>&1; then
         csye6225
 fi
 
+# -------------------------------------
+# Deploy application files
+# -------------------------------------
 
+APP_DIR="/opt/csye6225"
+APP_USER="csye6225"
+APP_GROUP="csye6225"
+APP_ARCHIVE="/tmp/webapp.zip"
+
+# Create application directory if it doesn't exist
+mkdir -p "$APP_DIR"
+
+# Extract application files if archive exists
+if [ -f "$APP_ARCHIVE" ]; then
+    unzip -o "$APP_ARCHIVE" -d "$APP_DIR"
+fi
+
+# Set ownership
+chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
+
+# Set permissions 
+# 7 - Full permission for owner; 
+# 5 - Group users have read and run access but no write access, and
+# 0 - Others have no access
+chmod -R 750 "$APP_DIR"
