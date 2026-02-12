@@ -39,7 +39,7 @@ Replace the placeholders:
 npm run dev
 ```
 
-This will automatically run database migrations and start the server.
+This will automatically run database migrations and start the server. 
 
 **Production mode:**
 ```bash
