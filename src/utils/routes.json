@@ -1,4 +1,5 @@
 {
-    "health":"/health",
-    "user":"/v1/user"
+    "health": "/health",
+    "user": "/v1/user",
+    "metadata": "/v1/metadata"
 }
