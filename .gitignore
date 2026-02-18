@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 *.pkrvars.hcl
 packer-manifest.json
 webapp.zip
+
+#packer manifest lock
+*.lock
