@@ -133,11 +133,16 @@ function extractLastSegment(fqPath) {
 }
 
 async function getGCPMetadata() {
-  const [instanceId, zoneFQ, machineTypeFQ] = await Promise.all([
-    gcpGet("/computeMetadata/v1/instance/id"),
-    gcpGet("/computeMetadata/v1/instance/zone"),
-    gcpGet("/computeMetadata/v1/instance/machine-type"),
-  ]);
+  const [instanceId, zoneFQ, machineTypeFQ, hostname, projectId, cpuPlatform, imageFQ] =
+    await Promise.all([
+      gcpGet("/computeMetadata/v1/instance/id"),
+      gcpGet("/computeMetadata/v1/instance/zone"),
+      gcpGet("/computeMetadata/v1/instance/machine-type"),
+      gcpGet("/computeMetadata/v1/instance/hostname"),
+      gcpGet("/computeMetadata/v1/project/project-id"),
+      gcpGet("/computeMetadata/v1/instance/cpu-platform"),
+      gcpGet("/computeMetadata/v1/instance/image").catch(() => null),
+    ]);
 
   // Enumerate network interfaces
   const ifaceListRaw = await gcpGet("/computeMetadata/v1/instance/network-interfaces/");
@@ -169,11 +174,20 @@ async function getGCPMetadata() {
     })
   );
 
+  const zone = extractLastSegment(zoneFQ);
+  // Extract region from zone (e.g., us-east1-b -> us-east1)
+  const region = zone.split("-").slice(0, -1).join("-");
+
   return {
     cloud_platform: "gcp",
     instance_id: instanceId,
-    region: extractLastSegment(zoneFQ),
+    region: zone,
+    availability_zone: zone,
     machine_type: extractLastSegment(machineTypeFQ),
+    hostname,
+    project_id: projectId,
+    cpu_platform: cpuPlatform,
+    image: imageFQ ? extractLastSegment(imageFQ) : null,
     network_interfaces: networkInterfaces,
   };
 }
@@ -187,14 +201,42 @@ function awsGet(path) {
 }
 
 async function getAWSMetadata() {
-  const [instanceId, az, instanceType] = await Promise.all([
-    awsGet("/latest/meta-data/instance-id"),
-    awsGet("/latest/meta-data/placement/availability-zone"),
-    awsGet("/latest/meta-data/instance-type"),
-  ]);
+  const [instanceId, az, instanceType, hostname, amiId, publicHostname] =
+    await Promise.all([
+      awsGet("/latest/meta-data/instance-id"),
+      awsGet("/latest/meta-data/placement/availability-zone"),
+      awsGet("/latest/meta-data/instance-type"),
+      awsGet("/latest/meta-data/hostname"),
+      awsGet("/latest/meta-data/ami-id"),
+      awsGet("/latest/meta-data/public-hostname").catch(() => null),
+    ]);
 
   // Region is AZ without the trailing letter (e.g., us-east-1a -> us-east-1)
   const region = az.replace(/[a-z]$/, "");
+
+  // Get account ID from instance identity document
+  let accountId = null;
+  try {
+    const identityDoc = await awsGet("/latest/dynamic/instance-identity/document");
+    const parsed = JSON.parse(identityDoc);
+    accountId = parsed.accountId || null;
+  } catch {
+    // Could not retrieve identity document
+  }
+
+  // Get architecture
+  let architecture = null;
+  try {
+    architecture = await awsGet("/latest/meta-data/system/processor/architecture");
+  } catch {
+    // Fallback: extract from identity document
+    try {
+      const identityDoc = await awsGet("/latest/dynamic/instance-identity/document");
+      architecture = JSON.parse(identityDoc).architecture || null;
+    } catch {
+      // Could not retrieve architecture
+    }
+  }
 
   // Enumerate network interfaces by MAC address
   const macsRaw = await awsGet("/latest/meta-data/network/interfaces/macs/");
@@ -230,7 +272,13 @@ async function getAWSMetadata() {
     cloud_platform: "aws",
     instance_id: instanceId,
     region,
+    availability_zone: az,
     machine_type: instanceType,
+    hostname,
+    public_hostname: publicHostname,
+    ami_id: amiId,
+    account_id: accountId,
+    architecture,
     network_interfaces: networkInterfaces,
   };
 }
