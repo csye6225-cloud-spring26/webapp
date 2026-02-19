@@ -1,0 +1,40 @@
+name: Packer Validate
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  packer-validate:
+    name: Validate Packer Template
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Packer
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+
+      # Step 3: Initialize Packer plugins
+      - name: Packer Init
+        run: packer init packer/
+
+      # Step 4: Check formatting — fail if template needs formatting changes
+      - name: Packer Format Check
+        run: |
+          if ! packer fmt -check -diff packer/; then
+            echo "Packer template is not properly formatted. Run 'packer fmt packer/' locally and commit the changes."
+            exit 1
+          fi
+
+      # Step 5: Create webapp archive
+      - name: Create webapp archive
+        run: git archive --format=zip --output=webapp.zip HEAD
+
+      # Step 6: Validate template syntax
+      - name: Packer Validate
+        run: packer validate packer/

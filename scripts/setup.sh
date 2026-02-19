@@ -6,11 +6,12 @@ set -e
 # =====================================
 # CSYE6225 Application Setup Script
 # Target OS: Ubuntu 24.04 LTS
+# Used by Packer for custom image builds
 # =====================================
 
 # Ensure script is run as root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root or using sudo"
+  echo "ERROR: Please run as root or using sudo"
   exit 1
 fi
 
@@ -18,25 +19,28 @@ fi
 # Update and upgrade system packages
 # -------------------------------------
 
-# Forcing the non interactive mode to avoid (Y/N) during automation
 export DEBIAN_FRONTEND=noninteractive
 
-# Refreshes package list
-apt update -y
+echo ">>> Updating system packages..."
+apt-get update -y
+echo ">>> Upgrading system packages..."
+apt-get upgrade -y
 
-# Applies latest patches
-apt upgrade -y
+if ! command -v unzip >/dev/null 2>&1; then
+  echo ">>> Installing unzip..."
+  apt-get install -y unzip
+fi
 
 # -------------------------------------
 # Install PostgreSQL
 # -------------------------------------
 
-# Condition to check if postgres is not installed
 if ! command -v psql >/dev/null 2>&1; then
-  apt install -y postgresql postgresql-contrib
+  echo ">>> Installing PostgreSQL..."
+  apt-get install -y postgresql postgresql-contrib
 fi
 
-# Start PostgreSQL and enable it on boot
+echo ">>> Enabling and starting PostgreSQL..."
 systemctl enable postgresql
 systemctl start postgresql
 
@@ -45,58 +49,46 @@ systemctl start postgresql
 # -------------------------------------
 
 DB_NAME="csye6225_webapp_db"
-DB_USER="webappuser"
+DB_USER="csye6225"
+DB_PASSWORD="${DB_PASSWORD}"
 
-sudo -u postgres psql <<EOF
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '${DB_NAME}') THEN
-      CREATE DATABASE ${DB_NAME};
-   END IF;
-END
-\$\$;
+echo ">>> Creating PostgreSQL user..."
+if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then
+    sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';"
+fi
 
-DO \$\$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${DB_USER}') THEN
-      CREATE USER ${DB_USER};
-   END IF;
-END
-\$\$;
+echo ">>> Creating PostgreSQL database..."
+if ! sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
+    sudo -u postgres psql -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;"
+fi
 
-GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
-EOF
+echo ">>> Granting database privileges..."
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
 
 # -------------------------------------
-# Install Node.js 20 and pm2
+# Install Node.js 20
 # -------------------------------------
 
-# Check if Node.js is installed; install Node.js 20 if missing
 if ! command -v node >/dev/null 2>&1; then
+    echo ">>> Installing Node.js 20..."
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    apt install -y nodejs
+    apt-get install -y nodejs
 fi
 
-# Check if PM2 is installed; install it globally if missing
-if ! command -v pm2 >/dev/null 2>&1; then
-    npm install -g pm2
-fi
+echo ">>> Node.js version: $(node --version)"
+echo ">>> npm version: $(npm --version)"
 
 # -------------------------------------
 # Create application group and user
 # -------------------------------------
 
-# Create group if it does not exist
 if ! getent group csye6225 >/dev/null; then
+    echo ">>> Creating group csye6225..."
     groupadd csye6225
 fi
 
-# Create user if it does not exist
-# --system: create a system account
-# --no-create-home: do not create a home directory
-# --gid csye6225: assign user to application group
-# --shell /usr/sbin/nologin: disable interactive login
 if ! id csye6225 >/dev/null 2>&1; then
+    echo ">>> Creating user csye6225..."
     useradd \
         --system \
         --no-create-home \
@@ -114,21 +106,61 @@ APP_USER="csye6225"
 APP_GROUP="csye6225"
 APP_ARCHIVE="/tmp/webapp.zip"
 
-# Create application directory if it doesn't exist
 mkdir -p "$APP_DIR"
 
-# Extract application files if archive exists
 if [ -f "$APP_ARCHIVE" ]; then
+    echo ">>> Extracting application files..."
     unzip -o "$APP_ARCHIVE" -d "$APP_DIR"
+else
+    echo "ERROR: $APP_ARCHIVE not found!"
+    exit 1
 fi
 
-# Set ownership
+# -------------------------------------
+# Create environment file
+# (must exist before npm install / prisma generate)
+# -------------------------------------
+
+echo ">>> Creating environment file..."
+cat > "$APP_DIR/.env" <<EOF
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
+PORT=8080
+NODE_ENV=production
+EOF
+
+# -------------------------------------
+# Install npm dependencies
+# -------------------------------------
+
+echo ">>> Installing npm dependencies..."
+cd "$APP_DIR"
+npm install
+
+# -------------------------------------
+# Set ownership and permissions
+# ALL app files must be owned by csye6225:csye6225
+# -------------------------------------
+
+echo ">>> Setting ownership to csye6225:csye6225..."
 chown -R "$APP_USER:$APP_GROUP" "$APP_DIR"
 
-# Set permissions 
-# 7 - Full permission for owner; 
-# 5 - Group users have read and run access but no write access, and
-# 0 - Others have no access
+echo ">>> Setting permissions to 750..."
 chmod -R 750 "$APP_DIR"
 
-echo "Setup completed successfully!"
+# -------------------------------------
+# Install and enable systemd service
+# -------------------------------------
+
+echo ">>> Installing systemd service..."
+cp /tmp/webapp.service /etc/systemd/system/webapp.service
+sudo systemctl daemon-reload
+sudo systemctl enable webapp
+
+# -------------------------------------
+# Cleanup
+# -------------------------------------
+
+echo ">>> Cleaning up temp files..."
+rm -f /tmp/webapp.zip /tmp/webapp.service
+
+echo ">>> Setup completed successfully!"
