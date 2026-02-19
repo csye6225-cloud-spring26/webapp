@@ -50,7 +50,7 @@ systemctl start postgresql
 
 DB_NAME="csye6225_webapp_db"
 DB_USER="csye6225"
-DB_PASSWORD="${DB_PASSWORD:-csye6225password}"
+DB_PASSWORD="${DB_PASSWORD}"
 
 echo ">>> Creating PostgreSQL user..."
 if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then

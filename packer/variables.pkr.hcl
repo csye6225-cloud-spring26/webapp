@@ -28,6 +28,7 @@ variable "gcp_project_id" {
   default     = "placeholder"
 }
 
+# Used in CI/CD pipelines to specify the GCP project for sharing the image with
 variable "gcp_demo_project_id" {
   type        = string
   description = "GCP DEMO project ID to share the image with"
