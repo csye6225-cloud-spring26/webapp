@@ -31,6 +31,10 @@ jobs:
             exit 1
           fi
 
-      # Step 5: Validate template syntax
+      # Step 5: Create webapp archive
+      - name: Create webapp archive
+        run: git archive --format=zip --output=webapp.zip HEAD
+
+      # Step 6: Validate template syntax
       - name: Packer Validate
         run: packer validate packer/
