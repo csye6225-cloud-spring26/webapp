@@ -7,9 +7,9 @@ import { setBadRequest } from '../utils/response-handlers.js';
  */
 export const rejectOptions = (req, res, next) => {
   if (req.method === 'OPTIONS') {
-    logger.warn('OPTIONS request rejected globally', { 
-      method: req.method, 
-      path: req.originalUrl 
+    logger.warn('OPTIONS request rejected globally', {
+      method: req.method,
+      path: req.originalUrl
     });
     return res.status(405).end();
   }
@@ -22,9 +22,9 @@ export const rejectOptions = (req, res, next) => {
  */
 export const rejectHead = (req, res, next) => {
   if (req.method === 'HEAD') {
-    logger.warn('HEAD request rejected globally', { 
-      method: req.method, 
-      path: req.originalUrl 
+    logger.warn('HEAD request rejected globally', {
+      method: req.method,
+      path: req.originalUrl
     });
     return res.status(405).end();
   }
@@ -37,11 +37,11 @@ export const rejectHead = (req, res, next) => {
  */
 export const rejectQueryParams = (req, res, next) => {
   if (Object.keys(req.query).length > 0) {
-    logger.warn('Request rejected - query parameters not allowed', { 
-      method: req.method, 
-      path: req.originalUrl 
+    logger.warn('Request rejected - query parameters not allowed', {
+      method: req.method,
+      path: req.originalUrl
     });
-    return res.status(400).end();
+    return setBadRequest({ message: 'Query parameters are not allowed' }, req, res);
   }
   next();
 };
@@ -52,9 +52,9 @@ export const rejectQueryParams = (req, res, next) => {
  */
 export const rejectAuthHeaders = (req, res, next) => {
   if (req.headers.authorization) {
-    logger.warn('Request rejected - authentication not allowed on public endpoint', { 
-      method: req.method, 
-      path: req.originalUrl 
+    logger.warn('Request rejected - authentication not allowed on public endpoint', {
+      method: req.method,
+      path: req.originalUrl
     });
     return res.status(400).end();
   }
@@ -67,9 +67,9 @@ export const rejectAuthHeaders = (req, res, next) => {
  */
 export const rejectNonGetMethods = (req, res, next) => {
   if (req.method !== 'GET') {
-    logger.warn('Request rejected - only GET method allowed', { 
-      method: req.method, 
-      path: req.originalUrl 
+    logger.warn('Request rejected - only GET method allowed', {
+      method: req.method,
+      path: req.originalUrl
     });
     return res.status(405).end();
   }
@@ -82,9 +82,9 @@ export const rejectNonGetMethods = (req, res, next) => {
  * Catches all requests that don't match defined routes
  */
 export const notFoundHandler = (req, res) => {
-  logger.warn('Invalid HTTP method or route not found', { 
-    method: req.method, 
-    path: req.originalUrl.split('?')[0] 
+  logger.warn('Invalid HTTP method or route not found', {
+    method: req.method,
+    path: req.originalUrl.split('?')[0]
   });
   res.status(405).end();
 };
