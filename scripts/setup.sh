@@ -32,40 +32,6 @@ if ! command -v unzip >/dev/null 2>&1; then
 fi
 
 # -------------------------------------
-# Install PostgreSQL
-# -------------------------------------
-
-if ! command -v psql >/dev/null 2>&1; then
-  echo ">>> Installing PostgreSQL..."
-  apt-get install -y postgresql postgresql-contrib
-fi
-
-echo ">>> Enabling and starting PostgreSQL..."
-systemctl enable postgresql
-systemctl start postgresql
-
-# -------------------------------------
-# Create PostgreSQL database and user
-# -------------------------------------
-
-DB_NAME="csye6225_webapp_db"
-DB_USER="csye6225"
-DB_PASSWORD="${DB_PASSWORD}"
-
-echo ">>> Creating PostgreSQL user..."
-if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then
-    sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';"
-fi
-
-echo ">>> Creating PostgreSQL database..."
-if ! sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
-    sudo -u postgres psql -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;"
-fi
-
-echo ">>> Granting database privileges..."
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
-
-# -------------------------------------
 # Install Node.js 20
 # -------------------------------------
 
@@ -117,13 +83,13 @@ else
 fi
 
 # -------------------------------------
-# Create environment file
-# (must exist before npm install / prisma generate)
+# Create a placeholder .env file
+# (Real values injected by EC2 user data at boot time)
 # -------------------------------------
 
-echo ">>> Creating environment file..."
+echo ">>> Creating placeholder environment file..."
 cat > "$APP_DIR/.env" <<EOF
-DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
+# Placeholder — overwritten by EC2 user data at launch
 PORT=8080
 NODE_ENV=production
 EOF

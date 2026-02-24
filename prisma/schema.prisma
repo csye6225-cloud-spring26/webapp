@@ -29,6 +29,52 @@ model HealthCheck {
   check_id       Int      @id @default(autoincrement())
   check_datetime DateTime @default(now()) @db.Timestamptz(6)
 
-
   @@map("health_checks")
+}
+
+model Course {
+  id              String   @id @default(uuid())
+  department_code String
+  number          String
+  title           String   @db.VarChar(255)
+  credit_hours    Int
+  classification  String   // "core" or "elective"
+  description     String?  @db.VarChar(2000)
+  prerequisites   String?  @db.VarChar(512)
+  has_syllabus    Boolean  @default(false)
+  date_created    DateTime @default(now())
+  date_updated    DateTime @updatedAt
+
+  // Audit columns (not exposed in API responses)
+  created_by String?
+  updated_by String?
+
+  // One-to-one relationship: a course has at most one syllabus
+  syllabus Syllabus?
+
+  // Unique constraint: department_code + number must be unique
+  @@unique([department_code, number])
+  @@map("courses")
+}
+
+model Syllabus {
+  id             String   @id @default(uuid())
+  course_id      String   @unique // one-to-one: each course has at most one syllabus
+  file_name      String
+  s3_bucket_name String
+  s3_object_key  String
+  content_type   String
+  file_size      Int
+  url            String
+  date_created   DateTime @default(now())
+  date_updated   DateTime @updatedAt
+
+  // Audit columns (not exposed in API responses)
+  created_by String?
+  updated_by String?
+
+  // Foreign key relationship to Course
+  course Course @relation(fields: [course_id], references: [id])
+
+  @@map("syllabi")
 }
