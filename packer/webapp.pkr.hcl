@@ -86,7 +86,6 @@ build {
   # Run setup script
   provisioner "shell" {
     environment_vars = [
-      "DB_PASSWORD=${var.db_password}",
       "DEBIAN_FRONTEND=noninteractive"
     ]
     inline = [
