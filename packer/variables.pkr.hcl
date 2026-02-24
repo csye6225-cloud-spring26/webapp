@@ -41,12 +41,12 @@ variable "gcp_zone" {
   description = "GCP zone to build the image in"
 }
 
-variable "db_password" {
-  type        = string
-  default     = "placeholder"
-  sensitive   = true
-  description = "Password for the PostgreSQL database user"
-}
+# variable "db_password" {
+#   type        = string
+#   default     = "placeholder"
+#   sensitive   = true
+#   description = "Password for the PostgreSQL database user"
+# }
 
 variable "app_artifact_path" {
   type        = string
