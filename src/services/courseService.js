@@ -193,7 +193,7 @@ export async function createCourse(data, userEmail) {
 
     return { course };
   } catch (error) {
-    logger.error('Error creating course', { error: error.message, stack: error.stack });
+    logger.error({ message: 'Error creating course', error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -239,7 +239,7 @@ export async function updateCourse(id, data, userEmail) {
     const course = await courseModel.updateCourse(id, updateData);
     return { course };
   } catch (error) {
-    logger.error('Error updating course', { id, error: error.message, stack: error.stack });
+    logger.error({ message: 'Error updating course', id, error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -268,7 +268,7 @@ export async function deleteCourse(id) {
     await courseModel.deleteCourse(id);
     return { success: true };
   } catch (error) {
-    logger.error('Error deleting course', { id, error: error.message, stack: error.stack });
+    logger.error({ message: 'Error deleting course', id, error: error.message, stack: error.stack });
     throw error;
   }
 }
