@@ -3,6 +3,7 @@ import cors from "cors";
 import initializeRoutes from './routes/index.js';
 import { notFoundHandler, jsonErrorHandler, rejectOptions, rejectHead, rejectQueryParams } from './middleware/errorHandler.js';
 import requestLogger from './middleware/requestLogger.js';
+import metricsMiddleware from './middleware/metricsMiddleware.js';
 import { logger } from './utils/logger.js';
 
 /**
@@ -14,6 +15,7 @@ const initialze = (app)=>{
     try {
         logger.info({ message: 'Initializing application' });
         app.use(requestLogger);
+        app.use(metricsMiddleware);
         app.use(rejectOptions);
         app.use(rejectHead);
         
