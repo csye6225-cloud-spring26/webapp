@@ -8,7 +8,7 @@ import { logger } from '../utils/logger.js';
  */
 export async function insertHealthCheck() {
   try {
-    logger.debug('Inserting health check record');
+    logger.debug({ message: 'Inserting health check record' });
     const healthCheck = await prisma.healthCheck.create({});
     return healthCheck;
   } catch (error) {

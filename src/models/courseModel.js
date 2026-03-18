@@ -9,10 +9,15 @@ import { logger } from '../utils/logger.js';
 export async function createCourse(data) {
   try {
     const course = await prisma.course.create({ data });
-    logger.info('Course created successfully', { id: course.id, department_code: course.department_code, number: course.number });
+    logger.info({
+      message: 'Course created successfully',
+      id: course.id,
+      department_code: course.department_code,
+      number: course.number
+    });
     return course;
   } catch (error) {
-    logger.error('Database error - failed to create course', { error: error.message, stack: error.stack });
+    logger.error({ message: 'Database error - failed to create course', error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -29,10 +34,10 @@ export async function getAllCourses() {
         { number: 'asc' }
       ]
     });
-    logger.debug('Retrieved all courses', { count: courses.length });
+    logger.debug({ message: 'Retrieved all courses', count: courses.length });
     return courses;
   } catch (error) {
-    logger.error('Database error - failed to get courses', { error: error.message, stack: error.stack });
+    logger.error({ message: 'Database error - failed to get courses', error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -47,7 +52,7 @@ export async function getCourseById(id) {
     const course = await prisma.course.findUnique({ where: { id } });
     return course;
   } catch (error) {
-    logger.error('Database error - failed to get course by id', { id, error: error.message, stack: error.stack });
+    logger.error({ message: 'Database error - failed to get course by id', id, error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -67,7 +72,12 @@ export async function getCourseByCodeAndNumber(department_code, number) {
     });
     return course;
   } catch (error) {
-    logger.error('Database error - failed to find course by code and number', { department_code, number, error: error.message });
+    logger.error({
+      message: 'Database error - failed to find course by code and number',
+      department_code,
+      number,
+      error: error.message
+    });
     throw error;
   }
 }
@@ -84,10 +94,10 @@ export async function updateCourse(id, data) {
       where: { id },
       data
     });
-    logger.info('Course updated successfully', { id });
+    logger.info({ message: 'Course updated successfully', id });
     return course;
   } catch (error) {
-    logger.error('Database error - failed to update course', { id, error: error.message, stack: error.stack });
+    logger.error({ message: 'Database error - failed to update course', id, error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -100,10 +110,10 @@ export async function updateCourse(id, data) {
 export async function deleteCourse(id) {
   try {
     const course = await prisma.course.delete({ where: { id } });
-    logger.info('Course deleted successfully', { id });
+    logger.info({ message: 'Course deleted successfully', id });
     return course;
   } catch (error) {
-    logger.error('Database error - failed to delete course', { id, error: error.message, stack: error.stack });
+    logger.error({ message: 'Database error - failed to delete course', id, error: error.message, stack: error.stack });
     throw error;
   }
 }
