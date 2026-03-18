@@ -13,10 +13,11 @@ export default async function basicAuth(req, res, next) {
     const auth = req.headers.authorization;
 
     if (!auth || !auth.startsWith('Basic ')) {
-      logger.warn('Authentication failed - missing or invalid authorization header', { 
-        path: req.originalUrl.split('?')[0], 
+      logger.warn({
+        message: 'Authentication failed - missing or invalid authorization header',
+        path: req.originalUrl.split('?')[0],
         method: req.method,
-        hasAuth: !!auth 
+        hasAuth: !!auth
       });
       return setUnauthorized({ message: 'Authentication credentials are missing or invalid' }, req, res);
     }
@@ -31,10 +32,11 @@ export default async function basicAuth(req, res, next) {
     }
 
     if (!username || !password) {
-      logger.warn('Authentication failed - incomplete credentials', { 
+      logger.warn({
+        message: 'Authentication failed - incomplete credentials',
         path: req.originalUrl.split('?')[0],
         hasUsername: !!username,
-        hasPassword: !!password 
+        hasPassword: !!password
       });
       return setUnauthorized({ message: 'Authentication credentials are missing or invalid' }, req, res);
     }
@@ -42,9 +44,10 @@ export default async function basicAuth(req, res, next) {
     // Look up user in database
     const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
-      logger.warn('Authentication failed - user not found', { 
-        username, 
-        path: req.originalUrl.split('?')[0] 
+      logger.warn({
+        message: 'Authentication failed for user - user not found',
+        username,
+        path: req.originalUrl.split('?')[0]
       });
       return setUnauthorized({ message: 'Authentication credentials are missing or invalid' }, req, res);
     }
@@ -52,24 +55,27 @@ export default async function basicAuth(req, res, next) {
     // Verify password matches stored hash
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
-      logger.warn('Authentication failed - invalid password', { 
-        username, 
-        path: req.originalUrl.split('?')[0] 
+      logger.warn({
+        message: 'Authentication failed for user - invalid password',
+        username,
+        path: req.originalUrl.split('?')[0]
       });
       return setUnauthorized({ message: 'Authentication credentials are missing or invalid' }, req, res);
     }
 
-    logger.info('Authentication successful', { 
-      username, 
-      path: req.originalUrl.split('?')[0] 
+    logger.info({
+      message: 'Authentication successful',
+      username,
+      path: req.originalUrl.split('?')[0]
     });
     req.user = user;
     next();
   } catch (error) {
-    logger.error('Authentication error - unexpected exception', { 
+    logger.error({
+      message: 'Authentication error - unexpected exception',
       error: error.message,
       stack: error.stack,
-      path: req.originalUrl.split('?')[0] 
+      path: req.originalUrl.split('?')[0]
     });
     return setUnauthorized({ message: 'Authentication credentials are missing or invalid' }, req, res);
   }
