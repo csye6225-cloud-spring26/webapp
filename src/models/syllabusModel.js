@@ -20,10 +20,15 @@ export async function createSyllabus(data) {
       return syllabus;
     });
 
-    logger.info('Syllabus created successfully', { id: result.id, course_id: data.course_id });
+    logger.info({ message: 'Syllabus created successfully', id: result.id, course_id: data.course_id });
     return result;
   } catch (error) {
-    logger.error('Database error - failed to create syllabus', { course_id: data.course_id, error: error.message, stack: error.stack });
+    logger.error({
+      message: 'Database error - failed to create syllabus',
+      course_id: data.course_id,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }
@@ -40,7 +45,12 @@ export async function getSyllabusByCourseId(courseId) {
     });
     return syllabus;
   } catch (error) {
-    logger.error('Database error - failed to get syllabus', { course_id: courseId, error: error.message, stack: error.stack });
+    logger.error({
+      message: 'Database error - failed to get syllabus',
+      course_id: courseId,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }
@@ -66,10 +76,15 @@ export async function deleteSyllabus(courseId) {
       return syllabus;
     });
 
-    logger.info('Syllabus deleted successfully', { course_id: courseId });
+    logger.info({ message: 'Syllabus deleted successfully', course_id: courseId });
     return result;
   } catch (error) {
-    logger.error('Database error - failed to delete syllabus', { course_id: courseId, error: error.message, stack: error.stack });
+    logger.error({
+      message: 'Database error - failed to delete syllabus',
+      course_id: courseId,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }

@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import { logger } from '../utils/logger.js';
+import { incrementMetric, timingMetric } from '../utils/metrics.js';
 
 // SDK automatically picks up credentials from EC2 instance profile
 // No access keys needed — this is the secure, recommended approach
@@ -20,6 +21,7 @@ const BUCKET_NAME = process.env.S3_BUCKET_NAME;
 export async function uploadFile(file, courseId) {
   const uniqueId = randomUUID();
   const objectKey = `${courseId}/${uniqueId}/${file.originalname}`;
+  const start = Date.now();
 
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
@@ -29,8 +31,10 @@ export async function uploadFile(file, courseId) {
   });
 
   try {
+    incrementMetric('s3.putobject.count');
     await s3Client.send(command);
-    logger.info('File uploaded to S3', { bucket: BUCKET_NAME, key: objectKey });
+    timingMetric('s3.putobject.response_time', Date.now() - start);
+    logger.info({ message: 'File uploaded to S3', bucket: BUCKET_NAME, key: objectKey, courseId });
 
     return {
       s3_bucket_name: BUCKET_NAME,
@@ -38,7 +42,16 @@ export async function uploadFile(file, courseId) {
       url: `https://${BUCKET_NAME}.s3.amazonaws.com/${objectKey}`
     };
   } catch (error) {
-    logger.error('S3 upload failed', { bucket: BUCKET_NAME, key: objectKey, error: error.message, stack: error.stack });
+    incrementMetric('s3.putobject.error');
+    timingMetric('s3.putobject.response_time', Date.now() - start);
+    logger.error({
+      message: 'S3 upload failed',
+      bucket: BUCKET_NAME,
+      key: objectKey,
+      courseId,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }
@@ -48,16 +61,27 @@ export async function uploadFile(file, courseId) {
  * @param {string} objectKey - The S3 object key to delete
  */
 export async function deleteFile(objectKey) {
+  const start = Date.now();
   const command = new DeleteObjectCommand({
     Bucket: BUCKET_NAME,
     Key: objectKey
   });
 
   try {
+    incrementMetric('s3.deleteobject.count');
     await s3Client.send(command);
-    logger.info('File deleted from S3', { bucket: BUCKET_NAME, key: objectKey });
+    timingMetric('s3.deleteobject.response_time', Date.now() - start);
+    logger.info({ message: 'File deleted from S3', bucket: BUCKET_NAME, key: objectKey });
   } catch (error) {
-    logger.error('S3 delete failed', { bucket: BUCKET_NAME, key: objectKey, error: error.message, stack: error.stack });
+    incrementMetric('s3.deleteobject.error');
+    timingMetric('s3.deleteobject.response_time', Date.now() - start);
+    logger.error({
+      message: 'S3 delete failed',
+      bucket: BUCKET_NAME,
+      key: objectKey,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }

@@ -7,10 +7,18 @@ import { logger } from '../utils/logger.js';
  * Sets cache control headers to prevent response caching
  */
 export async function healthCheck(req, res) {
-  logger.debug('Health check request received');
+  logger.debug({
+    message: 'Health check request received',
+    method: req.method,
+    path: req.originalUrl.split('?')[0]
+  });
 
   if (req.body && Object.keys(req.body).length > 0) {
-    logger.warn('Health check rejected - body not allowed');
+    logger.warn({
+      message: 'Health check rejected - body not allowed',
+      method: req.method,
+      path: req.originalUrl.split('?')[0]
+    });
     return res.status(400).end();
   }
 
@@ -24,10 +32,14 @@ export async function healthCheck(req, res) {
   try {
     // Record health check in database to verify connectivity
     await insertHealthCheck();
-    logger.info('Health check passed - database is healthy');
+    logger.info({ message: 'Health check passed - database is healthy' });
     return res.status(200).end();
   } catch (error) {
-    logger.error('Health check failed - database unavailable', { error: error.message, stack: error.stack });
+    logger.error({
+      message: 'Health check failed - database unavailable',
+      error: error.message,
+      stack: error.stack
+    });
     return res.status(503).end();
   }
 }

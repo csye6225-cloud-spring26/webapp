@@ -45,6 +45,25 @@ echo ">>> Node.js version: $(node --version)"
 echo ">>> npm version: $(npm --version)"
 
 # -------------------------------------
+# Install Amazon CloudWatch Agent
+# -------------------------------------
+
+echo ">>> Installing Amazon CloudWatch Agent..."
+wget -q https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -O /tmp/amazon-cloudwatch-agent.deb
+dpkg -i /tmp/amazon-cloudwatch-agent.deb
+rm -f /tmp/amazon-cloudwatch-agent.deb
+echo ">>> CloudWatch Agent installed: $(/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a status | head -1)"
+
+# -------------------------------------
+# Copy CloudWatch Agent configuration
+# -------------------------------------
+
+echo ">>> Copying CloudWatch Agent configuration..."
+mkdir -p /opt/aws/amazon-cloudwatch-agent/etc
+cp /tmp/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+rm -f /tmp/amazon-cloudwatch-agent.json
+
+# -------------------------------------
 # Create application group and user
 # -------------------------------------
 

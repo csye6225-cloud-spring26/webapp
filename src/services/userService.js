@@ -13,12 +13,12 @@ export async function userExists(username) {
   try {
     // Convert to lowercase for case-insensitive check
     const lowercaseUsername = username.toLowerCase();
-    logger.debug('Checking if user exists', { username: lowercaseUsername });
+        logger.debug({ message: 'Checking if user exists', username: lowercaseUsername });
     const user = await getUserByUsername(lowercaseUsername);
     const exists = user !== null;
     return exists;
   } catch (error) {
-    logger.error('Error checking user existence', { username, error: error.message });
+        logger.error({ message: 'Error checking user existence', username, error: error.message });
     throw error;
   }
 }
@@ -32,7 +32,6 @@ export async function registerUser({ username, password, first_name, last_name }
     try {
         // Ensure username is lowercase
         const lowercaseUsername = username.toLowerCase();
-        logger.info('Registering new user', { username: lowercaseUsername, first_name, last_name });
         const hash = await bcrypt.hash(password, SALT_ROUNDS);
         const now = new Date();
         const user = await createUser({
@@ -43,10 +42,9 @@ export async function registerUser({ username, password, first_name, last_name }
             account_created: now,
             account_updated: now,
         });
-        logger.info('User registered successfully', { username });
         return user;
     } catch (error) {
-        logger.error('Error registering user', { username, error: error.message, stack: error.stack });
+        logger.error({ message: 'Error registering user', username, error: error.message, stack: error.stack });
         throw error;
     }
 };
@@ -60,7 +58,6 @@ export async function registerUser({ username, password, first_name, last_name }
  */
 export async function updateUserDetails(userId, payload) {
     try {
-        logger.info('Updating user details', { fields: Object.keys(payload) });
         const data = {};
 
         if (payload.first_name) data.first_name = payload.first_name;
@@ -68,15 +65,14 @@ export async function updateUserDetails(userId, payload) {
 
         // Hash password before storing in database
         if (payload.password) {
-            logger.debug('Hashing new password for user');
+            logger.debug({ message: 'Hashing new password for user', userId });
             data.password = await bcrypt.hash(payload.password, SALT_ROUNDS);
         }
 
         const updatedUser = await updateUser(userId, data);
-        logger.info('User details updated successfully');
         return updatedUser;
     } catch (error) {
-        logger.error('Error updating user details', { userId, error: error.message, stack: error.stack });
+        logger.error({ message: 'Error updating user details', userId, error: error.message, stack: error.stack });
         throw error;
     }
 }

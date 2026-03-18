@@ -8,7 +8,11 @@ import { logger } from "../utils/logger.js";
  * Returns 503 if platform detection or metadata retrieval fails.
  */
 export async function metadataCheck(req, res) {
-  logger.debug("Metadata endpoint request received");
+  logger.debug({
+    message: 'Metadata endpoint request received',
+    method: req.method,
+    path: req.originalUrl.split('?')[0]
+  });
 
   // Reject requests with a body
   if (
@@ -17,7 +21,11 @@ export async function metadataCheck(req, res) {
       ? Object.keys(req.body).length > 0
       : req.body.length > 0)
   ) {
-    logger.warn("Metadata request rejected - request body not allowed");
+    logger.warn({
+      message: 'Metadata request rejected - request body not allowed',
+      method: req.method,
+      path: req.originalUrl.split('?')[0]
+    });
     return res.status(400).json({
       error: "Bad Request",
       message: "Request body is not allowed",
@@ -35,14 +43,16 @@ export async function metadataCheck(req, res) {
 
   try {
     const metadata = await getInstanceMetadata();
-    logger.info("Metadata retrieved successfully", {
-      platform: metadata.cloud_platform,
+    logger.info({
+      message: 'Metadata retrieved successfully',
+      platform: metadata.cloud_platform
     });
     return res.status(200).json(metadata);
   } catch (error) {
-    logger.error("Metadata retrieval failed", {
+    logger.error({
+      message: 'Metadata retrieval failed',
       error: error.message,
-      stack: error.stack,
+      stack: error.stack
     });
     return res.status(503).json({
       error: "Service Unavailable",

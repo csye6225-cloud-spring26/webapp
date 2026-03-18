@@ -77,6 +77,12 @@ build {
     destination = "/tmp/webapp.service"
   }
 
+  # Copy CloudWatch agent configuration
+  provisioner "file" {
+    source      = "packer/amazon-cloudwatch-agent.json"
+    destination = "/tmp/amazon-cloudwatch-agent.json"
+  }
+
   # Copy setup script
   provisioner "file" {
     source      = "scripts/setup.sh"

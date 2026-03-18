@@ -11,10 +11,11 @@ export async function createUser(data) {
     const user = await prisma.user.create({ data });
     return user;
   } catch (error) {
-    logger.error('Database error - failed to create user', { 
-      username: data.username, 
+    logger.error({
+      message: 'Database error - failed to create user',
+      username: data.username,
       error: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
     throw error;
   }
@@ -34,9 +35,11 @@ export async function updateUser(id, data) {
     });
     return user;
   } catch (error) {
-    logger.error('Database error - failed to update user', { 
+    logger.error({
+      message: 'Database error - failed to update user',
+      id,
       error: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
     throw error;
   }
@@ -51,16 +54,17 @@ export async function getUserByUsername(username) {
   try {
     const user = await prisma.user.findUnique({ where: { username } });
     if (user) {
-      logger.debug('User found in database', { username });
+      logger.debug({ message: 'User found in database', username });
     } else {
-      logger.debug('User not found in database', { username });
+      logger.debug({ message: 'User not found in database', username });
     }
     return user;
   } catch (error) {
-    logger.error('Database error - failed to get user by username', { 
-      username, 
+    logger.error({
+      message: 'Database error - failed to get user by username',
+      username,
       error: error.message,
-      stack: error.stack 
+      stack: error.stack
     });
     throw error;
   }

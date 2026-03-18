@@ -66,7 +66,7 @@ export async function uploadSyllabus(courseId, file, userEmail) {
 
     return { syllabus };
   } catch (error) {
-    logger.error('Error uploading syllabus', { courseId, error: error.message, stack: error.stack });
+    logger.error({ message: 'Error uploading syllabus', courseId, error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -91,7 +91,7 @@ export async function getSyllabus(courseId) {
 
     return { syllabus };
   } catch (error) {
-    logger.error('Error getting syllabus', { courseId, error: error.message, stack: error.stack });
+    logger.error({ message: 'Error getting syllabus', courseId, error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -122,7 +122,7 @@ export async function deleteSyllabus(courseId) {
 
     return { success: true };
   } catch (error) {
-    logger.error('Error deleting syllabus', { courseId, error: error.message, stack: error.stack });
+    logger.error({ message: 'Error deleting syllabus', courseId, error: error.message, stack: error.stack });
     throw error;
   }
 }
