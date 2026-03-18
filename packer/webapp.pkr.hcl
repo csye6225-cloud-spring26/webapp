@@ -82,7 +82,7 @@ build {
     source      = "packer/amazon-cloudwatch-agent.json"
     destination = "/tmp/amazon-cloudwatch-agent.json"
   }
-  
+
   # Copy setup script
   provisioner "file" {
     source      = "scripts/setup.sh"
