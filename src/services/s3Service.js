@@ -30,7 +30,7 @@ export async function uploadFile(file, courseId) {
 
   try {
     await s3Client.send(command);
-    logger.info('File uploaded to S3', { bucket: BUCKET_NAME, key: objectKey });
+    logger.info({ message: 'File uploaded to S3', bucket: BUCKET_NAME, key: objectKey, courseId });
 
     return {
       s3_bucket_name: BUCKET_NAME,
@@ -38,7 +38,14 @@ export async function uploadFile(file, courseId) {
       url: `https://${BUCKET_NAME}.s3.amazonaws.com/${objectKey}`
     };
   } catch (error) {
-    logger.error('S3 upload failed', { bucket: BUCKET_NAME, key: objectKey, error: error.message, stack: error.stack });
+    logger.error({
+      message: 'S3 upload failed',
+      bucket: BUCKET_NAME,
+      key: objectKey,
+      courseId,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }
@@ -55,9 +62,15 @@ export async function deleteFile(objectKey) {
 
   try {
     await s3Client.send(command);
-    logger.info('File deleted from S3', { bucket: BUCKET_NAME, key: objectKey });
+    logger.info({ message: 'File deleted from S3', bucket: BUCKET_NAME, key: objectKey });
   } catch (error) {
-    logger.error('S3 delete failed', { bucket: BUCKET_NAME, key: objectKey, error: error.message, stack: error.stack });
+    logger.error({
+      message: 'S3 delete failed',
+      bucket: BUCKET_NAME,
+      key: objectKey,
+      error: error.message,
+      stack: error.stack
+    });
     throw error;
   }
 }

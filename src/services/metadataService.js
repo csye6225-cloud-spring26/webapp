@@ -106,16 +106,16 @@ export async function detectPlatform() {
 
   if (results[0].status === "fulfilled") {
     cachedPlatform = "gcp";
-    logger.info("Cloud platform detected: GCP");
+    logger.info({ message: 'Cloud platform detected', platform: 'gcp' });
     return cachedPlatform;
   }
   if (results[1].status === "fulfilled") {
     cachedPlatform = "aws";
-    logger.info("Cloud platform detected: AWS");
+    logger.info({ message: 'Cloud platform detected', platform: 'aws' });
     return cachedPlatform;
   }
 
-  logger.warn("No supported cloud platform detected");
+  logger.warn({ message: 'No supported cloud platform detected' });
   return null;
 }
 
@@ -302,9 +302,10 @@ export async function getInstanceMetadata() {
     if (platform === "gcp") return await getGCPMetadata();
     if (platform === "aws") return await getAWSMetadata();
   } catch (error) {
-    logger.error("Failed to retrieve instance metadata", {
+    logger.error({
+      message: 'Failed to retrieve instance metadata',
       platform,
-      error: error.message,
+      error: error.message
     });
     const err = new Error("Failed to retrieve instance metadata");
     err.status = 503;
