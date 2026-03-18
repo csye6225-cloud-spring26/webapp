@@ -1,40 +1,50 @@
-/**
- * Logging utility for consistent log formatting across the application
- * Uses CloudWatch-style log format for better readability
- */
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
 
-const LOG_LEVELS = {
-  INFO: 'INFO',
-  WARN: 'WARN',
-  ERROR: 'ERROR',
-  DEBUG: 'DEBUG'
-};
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+const DEFAULT_LOG_FILE_PATH = '/opt/csye6225/logs/webapp.log';
 
-const log = (level, message, meta = {}) => {
-  const timestamp = new Date().toISOString();
-  
-  // Build metadata string - exclude stack traces in production
-  const metaKeys = Object.keys(meta).filter(key => {
-    // Skip stack traces to keep logs clean
-    if (key === 'stack') return false;
-    return true;
-  });
-  
-  const metaStr = metaKeys.length > 0 
-    ? ' - ' + metaKeys.map(key => {
-        const value = typeof meta[key] === 'string' ? meta[key] : JSON.stringify(meta[key]);
-        return `${key}=${value}`;
-      }).join(', ')
-    : '';
-  
-  // CloudWatch-style format: ISO_TIMESTAMP [LEVEL] MESSAGE - metadata
-  const logEntry = `${timestamp} [${level}] ${message}${metaStr}`;
-  console.log(logEntry);
+let logFilePath = process.env.LOG_FILE_PATH || DEFAULT_LOG_FILE_PATH;
+
+try {
+  fs.mkdirSync(path.dirname(logFilePath), { recursive: true });
+} catch {
+  logFilePath = './logs/webapp.log';
+  fs.mkdirSync(path.dirname(logFilePath), { recursive: true });
+}
+
+const baseLogger = winston.createLogger({
+  level: LOG_LEVEL,
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: logFilePath })
+  ]
+});
+
+const normalizePayload = (payload, meta) => {
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    if (payload.message) {
+      return payload;
+    }
+    return { message: 'Log event', ...payload };
+  }
+
+  return {
+    message: typeof payload === 'string' ? payload : 'Log event',
+    ...(meta || {})
+  };
 };
 
 export const logger = {
-  info: (message, meta) => log(LOG_LEVELS.INFO, message, meta),
-  warn: (message, meta) => log(LOG_LEVELS.WARN, message, meta),
-  error: (message, meta) => log(LOG_LEVELS.ERROR, message, meta),
-  debug: (message, meta) => log(LOG_LEVELS.DEBUG, message, meta)
+  info: (payload, meta) => baseLogger.info(normalizePayload(payload, meta)),
+  warn: (payload, meta) => baseLogger.warn(normalizePayload(payload, meta)),
+  error: (payload, meta) => baseLogger.error(normalizePayload(payload, meta)),
+  debug: (payload, meta) => baseLogger.debug(normalizePayload(payload, meta))
 };
+
+export default logger;
