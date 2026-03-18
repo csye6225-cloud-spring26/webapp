@@ -20,9 +20,8 @@ export async function createUser(req, res) {
     // Validate Content-Type
     const contentType = req.headers['content-type'];
 
-    if(!contentType)
     if (!contentType || !contentType.includes('application/json')) {
-        logger.warn('Invalid Content-Type for user creation', { contentType });
+        logger.warn({ message: 'Invalid Content-Type for user creation', contentType });
         return setUnsupportedMediaType({ message: 'Content-Type must be application/json' }, req, res);
     }
 
@@ -33,7 +32,7 @@ export async function createUser(req, res) {
     const missingFields = requiredFields.filter(field => !req.body[field]);
 
     if (missingFields.length > 0) {
-        logger.warn('Missing required fields for user creation', { missingFields });
+        logger.warn({ message: 'Missing required fields for user creation', missingFields });
         return setBadRequestValidation({ 
             message: `Missing required fields: ${missingFields.join(', ')}` 
         }, req, res);
@@ -41,7 +40,8 @@ export async function createUser(req, res) {
 
         // Validate field types
     if (typeof username !== 'string' || typeof password !== 'string' || typeof first_name !== 'string' || typeof last_name !== 'string') {
-        logger.warn('Invalid data types for user creation', { 
+        logger.warn({
+            message: 'Invalid data types for user creation',
             usernameType: typeof username,
             passwordType: typeof password,
             firstNameType: typeof first_name,
@@ -57,19 +57,19 @@ export async function createUser(req, res) {
     
     // Validate email format
     if (!EMAIL_REGEX.test(username)) {
-        logger.warn('Invalid email format for user creation', { username });
+        logger.warn({ message: 'Invalid email format for user creation', username });
         return setBadRequestValidation({ message: 'Username must be a valid email address' }, req, res);
     }
 
     // Validate password length
     if (password.length < 8) {
-        logger.warn('Password too short for user creation', { username, passwordLength: password.length });
+        logger.warn({ message: 'Password too short for user creation', username, passwordLength: password.length });
         return setBadRequestValidation({ message: 'Password must be at least 8 characters' }, req, res);
     }
 
     // Validate first name and last name are not empty strings
     if (first_name.trim() === '' || last_name.trim() === '') {
-        logger.warn('Empty first name or last name for user creation');
+        logger.warn({ message: 'Empty first name or last name for user creation' });
         return setBadRequestValidation({ message: 'First name and last name are required' }, req, res);
     }
 
@@ -77,17 +77,17 @@ export async function createUser(req, res) {
         // Check if username already exists
         const exists = await userExists(username);
         if (exists) {
-            logger.warn('User creation failed - user already exists', { username });
+            logger.warn({ message: 'User creation failed - user already exists', username });
             return setConflict({ message: 'A user with this email address already exists' }, req, res);
         }
 
         const user = await registerUser({ username, password, first_name, last_name });
         // Exclude password from response payload for security
         const { password: _, ...response } = user;
-        logger.info('User created successfully', { username });
+        logger.info({ message: 'User created successfully', username, userId: user.id });
         return res.status(201).json(response);
     } catch (error) {
-        logger.error('Error creating user', { username, error: error.message, stack: error.stack });
+        logger.error({ message: 'Error creating user', username, error: error.message, stack: error.stack });
         return setInternalServerError(error, req, res);
     }
 }
@@ -97,7 +97,7 @@ export async function createUser(req, res) {
  * Requires valid Basic Authentication credentials
  */
 export function getSelf(req, res) {
-    logger.info('Retrieve user info', { username: req.user?.username, method: req.method, path: req.originalUrl.split('?')[0] });
+    logger.info({ message: 'Retrieved user profile', userId: req.user?.id, username: req.user?.username, method: req.method, path: req.originalUrl.split('?')[0] });
     const { id, first_name, last_name, username, account_created, account_updated } = req.user;
     return res.status(200).json({ id, first_name, last_name, username, account_created, account_updated });
 }
@@ -111,7 +111,7 @@ export async function updateSelf(req, res) {
     // Validate Content-Type
     const contentType = req.headers['content-type'];
     if (!contentType || !contentType.includes('application/json')) {
-        logger.warn('Invalid Content-Type for user update', { contentType });
+        logger.warn({ message: 'Invalid Content-Type for user update', contentType });
         return setUnsupportedMediaType({ message: 'Content-Type must be application/json' }, req, res);
     }
 
@@ -126,7 +126,7 @@ export async function updateSelf(req, res) {
         return setBadRequestValidation({ message: 'Invalid input data types' }, req, res);
     }
 
-    logger.info('Update user request', { username: req.user?.username, fields: Object.keys(req.body), method: req.method, path: req.originalUrl.split('?')[0] });
+    logger.info({ message: 'Received user update request', userId: req.user?.id, username: req.user?.username, fields: Object.keys(req.body), method: req.method, path: req.originalUrl.split('?')[0] });
 
     const allowed = ['first_name', 'last_name', 'password'];
     const keys = Object.keys(req.body);
@@ -134,7 +134,7 @@ export async function updateSelf(req, res) {
     // 400 if any non-updatable fields are present
     const invalidField = keys.find(k => !allowed.includes(k));
     if (invalidField) {
-        logger.warn('Attempt to update non-updatable field', { invalidField });
+        logger.warn({ message: 'Attempt to update non-updatable field', invalidField, userId: req.user?.id });
         return setBadRequestValidation({ message: `Field ${invalidField} cannot be updated` }, req, res);
     }
 
@@ -158,10 +158,10 @@ export async function updateSelf(req, res) {
 
     try {
         await updateUserDetails(req.user.id, req.body);
-        logger.info('User updated successfully', { username: req.user?.username });
+        logger.info({ message: 'User updated successfully', userId: req.user?.id, username: req.user?.username });
         return res.status(204).end();
     } catch (error) {
-        logger.error('Error updating user', { username: req.user?.username, error: error.message, stack: error.stack });
+        logger.error({ message: 'Error updating user', userId: req.user?.id, username: req.user?.username, error: error.message, stack: error.stack });
         return setInternalServerError(error, req, res);
     }
 }
