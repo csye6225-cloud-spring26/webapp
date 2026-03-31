@@ -19,12 +19,14 @@ model User {
   password        String
   first_name      String
   last_name       String
+  verified        Boolean  @default(false)
+  verification_token String?
+  token_expiry    DateTime?
   account_created DateTime @default(now())
   account_updated DateTime @updatedAt
 
   @@map("users")
 }
-
 model HealthCheck {
   check_id       Int      @id @default(autoincrement())
   check_datetime DateTime @default(now()) @db.Timestamptz(6)
