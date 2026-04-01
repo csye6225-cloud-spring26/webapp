@@ -62,6 +62,15 @@ export default async function basicAuth(req, res, next) {
       });
       return setUnauthorized({ message: 'Authentication credentials are missing or invalid' }, req, res);
     }
+    // Check if user's email is verified
+    if (!user.verified) {
+      logger.warn({
+        message: 'Authentication failed - email not verified',
+        username,
+        path: req.originalUrl.split('?')[0]
+      });
+      return res.status(403).json({ message: 'Email address has not been verified' });
+    }
 
     logger.info({
       message: 'Authentication successful',
