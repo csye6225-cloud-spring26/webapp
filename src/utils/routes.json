@@ -2,5 +2,6 @@
     "health": "/health",
     "user": "/v1/user",
     "metadata": "/v1/metadata",
-    "courses": "/v1/courses"
+    "courses": "/v1/courses",
+    "validateEmail": "/validateEmail"
 }
