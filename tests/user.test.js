@@ -6,6 +6,16 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+/**
+ * Helper: directly verify a user in the database (bypasses email flow for tests)
+ */
+async function verifyUser(username) {
+  await prisma.user.update({
+    where: { username: username.toLowerCase() },
+    data: { verified: true },
+  });
+}
+
 let app;
 
 beforeAll(async () => {
@@ -162,6 +172,7 @@ describe('A. 2. User Retrieval Tests', () => {
 
     const userId = createResponse.body.id;
 
+    await verifyUser('sophia.williams@tech.com');
     const authHeader = 'Basic ' + Buffer.from('sophia.williams@tech.com:SophiaW@pass2024').toString('base64');
     const getResponse = await request(app)
       .get('\/v1\/user/self')
@@ -184,6 +195,8 @@ describe('A. 2. User Retrieval Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('christopher.taylor@company.com');
 
     const authHeader = 'Basic ' + Buffer.from('christopher.taylor@company.com:ChrisTaylor@99').toString('base64');
     const response = await request(app)
@@ -208,6 +221,8 @@ describe('A. 2. User Retrieval Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+    
+    await verifyUser('jennifer.martinez@dev.com');
 
     const authHeader = 'Basic ' + Buffer.from('jennifer.martinez@dev.com:Jen@Martinez123').toString('base64');
     const response = await request(app)
@@ -234,6 +249,8 @@ describe('A. 2. User Retrieval Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('robert.garcia@enterprise.com');
 
     const authHeader = 'Basic ' + Buffer.from('robert.garcia@enterprise.com:Rob@Garcia2024').toString('base64');
     const response = await request(app)
@@ -263,6 +280,7 @@ describe('A. 3. User Update Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('lisa.anderson@startup.com');
     const authHeader = 'Basic ' + Buffer.from('lisa.anderson@startup.com:Lisa@Anderson88').toString('base64');
     const updateResponse = await request(app)
       .put('\/v1\/user/self')
@@ -296,6 +314,8 @@ describe('A. 3. User Update Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('michael.zhang@workplace.com');
+
     const authHeader = 'Basic ' + Buffer.from('michael.zhang@workplace.com:Mike@Zhang321').toString('base64');
     const updateResponse = await request(app)
       .put('\/v1\/user/self')
@@ -328,6 +348,8 @@ describe('A. 3. User Update Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('amanda.wilson@business.com');
+    
     const authHeader = 'Basic ' + Buffer.from('amanda.wilson@business.com:Amanda@Wil99').toString('base64');
     const updateResponse = await request(app)
       .put('\/v1\/user/self')
@@ -359,6 +381,8 @@ describe('A. 3. User Update Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('kevin.thomas@work.com');
 
     const authHeader = 'Basic ' + Buffer.from('kevin.thomas@work.com:KevinT@old123').toString('base64');
     const updateResponse = await request(app)
@@ -398,6 +422,8 @@ describe('A. 3. User Update Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('natalie.clark@online.com');
 
     const authHeader = 'Basic ' + Buffer.from('natalie.clark@online.com:Nat@Clark777').toString('base64');
     
@@ -444,6 +470,8 @@ describe('A. 4. Authentication Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('ryan.mitchell@corp.com');
+    
     const authHeader = 'Basic ' + Buffer.from('ryan.mitchell@corp.com:Ryan@Mitch2024').toString('base64');
     const response = await request(app)
       .get('\/v1\/user/self')
@@ -483,6 +511,8 @@ describe('A. 4. Authentication Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('daniel.harris@site.com');
+    
     const authHeader = 'Basic ' + Buffer.from('daniel.harris@site.com:Daniel@Har99').toString('base64');
     const response = await request(app)
       .get('\/v1\/user/self')
@@ -504,6 +534,8 @@ describe('A. 4. Authentication Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('isabella.turner@dev.com');
+    
     const authHeader = 'Basic ' + Buffer.from('isabella.turner@dev.com:Isabella@Turn88').toString('base64');
 
     const response1 = await request(app)
@@ -535,6 +567,8 @@ describe('A. 4. Authentication Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('brandon.foster@email.com');
 
     const authHeader = 'Basic ' + Buffer.from('brandon.foster@email.com:Brandon@Fos44').toString('base64');
     const response = await request(app)
@@ -773,6 +807,8 @@ describe('B. 1. Invalid Input Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('aaron.phillips@company.com');
+
     const authHeader = 'Basic ' + Buffer.from('aaron.phillips@company.com:Aaron@Phil66').toString('base64');
     const response = await request(app)
       .put('\/v1\/user/self')
@@ -798,6 +834,8 @@ describe('B. 1. Invalid Input Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('carlos.mendoza@network.com');
 
     const authHeader = 'Basic ' + Buffer.from('carlos.mendoza@network.com:Carlos@Mend99').toString('base64');
     const response = await request(app)
@@ -825,6 +863,8 @@ describe('B. 1. Invalid Input Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('jessica.young@digital.com');
+
     const authHeader = 'Basic ' + Buffer.from('jessica.young@digital.com:Jessica@You88').toString('base64');
     const response = await request(app)
       .put('\/v1\/user/self')
@@ -850,6 +890,8 @@ describe('B. 1. Invalid Input Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('thomas.wright@enterprise.com');
 
     const authHeader = 'Basic ' + Buffer.from('thomas.wright@enterprise.com:Thomas@Wri77').toString('base64');
     const response = await request(app)
@@ -883,6 +925,8 @@ describe('B. 2. Authentication Error Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('matthew.harris@work.com');
 
     const authHeader = 'Basic ' + Buffer.from('matthew.harris@work.com:WrongPassword99').toString('base64');
     const response = await request(app)
@@ -1351,6 +1395,8 @@ describe('C. 2. Performance Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('performance2@work.com');
+    
     const authHeader = 'Basic ' + Buffer.from('performance2@work.com:Perf@Test456').toString('base64');
     const startTime = Date.now();
     const response = await request(app)
@@ -1374,6 +1420,8 @@ describe('C. 2. Performance Tests', () => {
       .post('\/v1\/user')
       .set('Content-Type', 'application/json')
       .send(userData);
+
+    await verifyUser('performance3@work.com');
 
     const authHeader = 'Basic ' + Buffer.from('performance3@work.com:Perf@Test789').toString('base64');
     const startTime = Date.now();
@@ -1425,6 +1473,8 @@ describe('C. 2. Performance Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('concurrent.read@work.com');
+
     const authHeader = 'Basic ' + Buffer.from('concurrent.read@work.com:Read@Concurrent99').toString('base64');
     const requests = [];
     for (let i = 0; i < 5; i++) {
@@ -1463,6 +1513,8 @@ describe('C. 3. Data Integrity Tests', () => {
 
     const createdId = createResponse.body.id;
 
+    await verifyUser('integrity.test@work.com');
+
     const authHeader = 'Basic ' + Buffer.from('integrity.test@work.com:Integ@Data888').toString('base64');
     const getResponse = await request(app)
       .get('\/v1\/user/self')
@@ -1487,6 +1539,7 @@ describe('C. 3. Data Integrity Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('unchanged.field@work.com');
     const authHeader = 'Basic ' + Buffer.from('unchanged.field@work.com:Unchange@Pass77').toString('base64');
 
     const beforeUpdate = await request(app)
@@ -1525,6 +1578,8 @@ describe('C. 3. Data Integrity Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('password.change@work.com');
+
     const authHeader = 'Basic ' + Buffer.from('password.change@work.com:OldPass@123').toString('base64');
     const beforeUpdate = await request(app)
       .get('\/v1\/user/self')
@@ -1538,6 +1593,7 @@ describe('C. 3. Data Integrity Tests', () => {
         password: 'NewPass@456'
       });
 
+    await verifyUser('password.change@work.com');
     const newAuthHeader = 'Basic ' + Buffer.from('password.change@work.com:NewPass@456').toString('base64');
     const afterUpdate = await request(app)
       .get('\/v1\/user/self')
@@ -1579,6 +1635,7 @@ describe('C. 3. Data Integrity Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('sequential.update@work.com');
     const authHeader = 'Basic ' + Buffer.from('sequential.update@work.com:Seq@Update88').toString('base64');
 
     await request(app)
@@ -1646,6 +1703,7 @@ describe('C. 3. Data Integrity Tests', () => {
       .set('Content-Type', 'application/json')
       .send(userData);
 
+    await verifyUser('MixedCase.Email@Company.COM');
     const authHeader = 'Basic ' + Buffer.from('mixedcase.email@company.com:Mixed@Case99').toString('base64');
     const response = await request(app)
       .get('\/v1\/user/self')
