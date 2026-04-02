@@ -24,7 +24,7 @@ const initialze = (app)=>{
         
         app.use(express.json());
         app.use(express.urlencoded({ extended: false }));
-        app.use(rejectQueryParams);
+        // app.use(rejectQueryParams);
         
         logger.debug({ message: 'Initializing application routes' });
         initializeRoutes(app);
