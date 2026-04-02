@@ -6,11 +6,12 @@ import {
   getSelf,
   updateSelf,
 } from '../controllers/userController.js';
+import { rejectQueryParams } from '../middleware/errorHandler.js';
 
 const router = express.Router();
 
-router.post('/', rejectAuthHeaders, createUser);
-router.get('/self', basicAuth, getSelf);
-router.put('/self', basicAuth, updateSelf);
+router.post('/', rejectAuthHeaders, rejectQueryParams, createUser);
+router.get('/self', rejectQueryParams, basicAuth, getSelf);
+router.put('/self', rejectQueryParams, basicAuth, updateSelf);
 
 export default router;

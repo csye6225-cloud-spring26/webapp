@@ -1,8 +1,8 @@
 import express from 'express';
-import { validateEmail } from '../controllers/verificationController.js';
+import { validateEmail,rejectNonGetMethods } from '../controllers/verificationController.js';
 
 const router = express.Router();
 
-router.get('/', validateEmail);
+router.get('/', rejectNonGetMethods, validateEmail);
 
 export default router;
