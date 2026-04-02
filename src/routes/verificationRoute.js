@@ -1,5 +1,6 @@
 import express from 'express';
-import { validateEmail,rejectNonGetMethods } from '../controllers/verificationController.js';
+import { validateEmail } from '../controllers/verificationController.js';
+import { rejectNonGetMethods } from '../middleware/errorHandler.js';
 
 const router = express.Router();
 
