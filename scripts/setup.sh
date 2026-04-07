@@ -31,6 +31,12 @@ if ! command -v unzip >/dev/null 2>&1; then
   apt-get install -y unzip
 fi
 
+# Install jq for JSON processing for the DB Password
+if ! command -v jq >/dev/null 2>&1; then
+  echo ">>> Installing jq..."
+  apt-get install -y jq
+fi
+
 # -------------------------------------
 # Install Node.js 20
 # -------------------------------------
