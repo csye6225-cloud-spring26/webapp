@@ -1,5 +1,6 @@
 {
     "health": "/health",
+    "healthNew": "/health456",
     "user": "/v1/user",
     "metadata": "/v1/metadata",
     "courses": "/v1/courses",
